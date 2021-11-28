@@ -1,53 +1,43 @@
 pipeline {
-    agent {
-        docker {
-     image 'wroquem/open-jdk:1.8'
-    }
-        
-    }
+    agent any
 
     stages {
-        stage('Build'){
+       
+        stage('Build') {
             steps {
-                powershell 'mvn compile'
+                echo 'Build'
+                bat 'mvn compile'
             }
         }
-
-        stage('Test'){
+        stage('test') {
             steps {
-                powershell 'mvn test'
+                echo 'test'
+                bat 'mvn test'
             }
         }
-
-        stage('Package'){
-            
-        steps {
-                powershell 'mvn package'
-           }
-
-         post {
-            always {
-                junit 'target/surefire-reports/TEST-*.xml'
-            }
-            success {
-                archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
-            }
-        }
-        
-        }
-
-        stage('Deploy'){
+        stage('package') {
             steps {
+                echo 'package'
+                bat 'mvn package'
+            }
+            post {
+          always {
+            junit 'target/surefire-reports/*.xml'
+          }
+          success{
+              archiveArtifacts artifacts: 'target/*.jar', followSymlinks: false
+          }
+        }
 
-                withEnv(['JENKINS_NODE_COOKIE=dontKillMe']) {
-
-                powershell '& java "-Dserver.port=8001" -jar target/spring-petclinic-2.3.1.BUILD-SNAPSHOT.jar'
-
+        }
+        stage('Deploy') {
+            steps {
+                withEnv(['JENKINS_NODE_COOCKIE=dontkillme']){
+                echo 'Deploy'
+                bat ' java -jar -Dserver.port=8001 target/spring-petclinic-2.3.1.BUILD-SNAPSHOT.jar '
                 }
             }
         }
     }
-
-
-
 }
+
